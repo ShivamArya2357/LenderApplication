@@ -1,4 +1,4 @@
-package com.lender.ledger.LenderApplication;
+package com.lender.ledger.LenderApplication.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;

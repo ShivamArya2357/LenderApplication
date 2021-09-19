@@ -1,5 +1,6 @@
 package com.lender.ledger.LenderApplication;
 
+import com.lender.ledger.LenderApplication.util.LenderServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +17,7 @@ import java.util.List;
 public class LenderApplication implements CommandLineRunner {
 
 	public static final String LENDER_SERVICE_FACTORY = "lenderServiceFactory";
+
 	@Autowired
 	private ApplicationContext appContext;
 
@@ -43,23 +45,4 @@ public class LenderApplication implements CommandLineRunner {
 			e.printStackTrace();
 		}
 	}
-
-//	@PostConstruct
-//	private void init() {
-//
-//		LenderServiceFactory factory = new LenderServiceFactory();
-//		try {
-//			BufferedReader br = new BufferedReader(new FileReader(filePath));
-//			String line = br.readLine();
-//			List<String> inputs = new ArrayList<>();
-//			while (line != null) {
-//				inputs.add(line);
-//				line = br.readLine();
-//			}
-//			factory.callService(inputs);
-//			br.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 }

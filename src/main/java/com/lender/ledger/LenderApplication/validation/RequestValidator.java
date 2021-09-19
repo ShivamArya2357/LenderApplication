@@ -1,7 +1,7 @@
 package com.lender.ledger.LenderApplication.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.lender.ledger.LenderApplication.ObjectMapperFactory;
+import com.lender.ledger.LenderApplication.util.ObjectMapperFactory;
 import com.lender.ledger.LenderApplication.enums.ErrorCode;
 import com.lender.ledger.LenderApplication.enums.Operation;
 import com.lender.ledger.LenderApplication.exception.LenderServiceException;

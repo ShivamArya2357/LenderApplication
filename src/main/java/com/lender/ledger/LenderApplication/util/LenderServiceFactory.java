@@ -1,7 +1,6 @@
-package com.lender.ledger.LenderApplication;
+package com.lender.ledger.LenderApplication.util;
 
 import com.lender.ledger.LenderApplication.enums.Operation;
-import com.lender.ledger.LenderApplication.exception.LenderServiceException;
 import com.lender.ledger.LenderApplication.model.Balance;
 import com.lender.ledger.LenderApplication.model.Loan;
 import com.lender.ledger.LenderApplication.model.Payment;
