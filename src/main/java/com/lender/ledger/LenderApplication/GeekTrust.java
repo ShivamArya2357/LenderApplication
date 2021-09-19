@@ -11,7 +11,7 @@ public class GeekTrust {
     public static void main(String[] args) {
 
         String filePath = args[0];
-        Factory factory = new Factory();
+        LenderServiceFactory factory = new LenderServiceFactory();
         BufferedReader br;
         try {
             br = new BufferedReader(new FileReader(filePath));

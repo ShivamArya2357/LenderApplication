@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.lender.ledger.LenderApplication.enums.Status.SUCCESS;
+import static com.lender.ledger.LenderApplication.enums.Status.COMPLETED;
 
 @Component
 public class PaymentServiceImpl implements PaymentService {
@@ -33,27 +33,63 @@ public class PaymentServiceImpl implements PaymentService {
     public void makePayment(Payment payment) {
 
         logger.info("Inside PaymentServiceImpl..makePayment()...");
-        LoanEntity loanEntity = lenderHelper.getLoan(payment.getBorrowerName(), payment.getBankName());
         EmiEntity[] emiEntities = lenderHelper.getEmisWithPersonNameAndBankName(payment.getBorrowerName(),
                 payment.getBankName()
         );
-        if (loanEntity.getTotalEmis() <= payment.getEmiNo()) {
-            reduceAmountIfMore(emiEntities, payment, loanEntity.getTotalAmountToPay());
-            savePaymentAndEmiInfo(payment);
+        if (emiEntities != null && emiEntities.length > 0) {
+            LoanEntity loanEntity = lenderHelper.getLoan(payment.getBorrowerName(), payment.getBankName());
+            int alreadyPaidAmt = getAlreadyPaidAmt(emiEntities, payment);
+            if (payment.getEmiNo() <= loanEntity.getTotalEmis() && alreadyPaidAmt < loanEntity.getTotalAmountToPay()
+                && payment.getLumpSumAmount() >= loanEntity.getEmiAmount()
+            ) {
+                reduceAmountIfMore(payment, alreadyPaidAmt, loanEntity.getTotalAmountToPay());
+                savePaymentAndEmiInfo(payment);
+            } else if (payment.getLumpSumAmount() < loanEntity.getEmiAmount()) {
+                throw new LenderServiceException(ErrorCode.LUMP_SUM_AMOUNT_IS_LESS_THAN_EMI_AMOUNT,
+                        String.valueOf(payment.getLumpSumAmount()), String.valueOf(loanEntity.getEmiAmount())
+                );
+            } else if (alreadyPaidAmt >= loanEntity.getTotalAmountToPay()) {
+                throw new LenderServiceException(ErrorCode.LUMP_SUM_AMOUNT_MORE_THAN_TOTAL_AMOUNT,
+                        String.valueOf(payment.getLumpSumAmount()), String.valueOf(alreadyPaidAmt),
+                        String.valueOf(loanEntity.getTotalAmountToPay())
+                );
+            } else {
+                throw new LenderServiceException(ErrorCode.INVALID_EMI_NO, String.valueOf(payment.getEmiNo()));
+            }
         } else {
-            throw new LenderServiceException(ErrorCode.INVALID_EMI_NO, String.valueOf(payment.getEmiNo()));
+            throw new LenderServiceException(ErrorCode.LOAN_IS_NOT_CREATED_WITH_THIS_PERSON_BANK_NAME,
+                    payment.getBorrowerName(), payment.getBankName()
+            );
         }
     }
 
-    private void reduceAmountIfMore(EmiEntity[] emiEntities, Payment payment, int totalAmntToPay) {
+    /**
+     * This method will reduce lumpSumAmount if this is more than the total amount
+     *
+     * @param payment
+     * @param totalAmntToPay
+     */
+    private void reduceAmountIfMore(Payment payment, int alreadyPaidAmt, int totalAmntToPay) {
 
-        int alreadyPaidAmt = 0;
-        for (int i = 0; i < payment.getEmiNo() - 1; i++) {
-            alreadyPaidAmt += emiEntities[i].getAmount();
-        }
         if (alreadyPaidAmt + payment.getLumpSumAmount() > totalAmntToPay) {
             payment.setLumpSumAmount(totalAmntToPay - alreadyPaidAmt);
         }
+    }
+
+    /**
+     * This method will return alreadyPaid amount
+     *
+     * @param emiEntities
+     * @param payment
+     * @return alreadyPaidAmount
+     */
+    private int getAlreadyPaidAmt(EmiEntity[] emiEntities, Payment payment) {
+
+        int alreadyPaidAmt = 0;
+        for (int i = 1; i < payment.getEmiNo(); i++) {
+            alreadyPaidAmt += emiEntities[i].getAmount();
+        }
+        return alreadyPaidAmt;
     }
 
     /**
@@ -77,8 +113,11 @@ public class PaymentServiceImpl implements PaymentService {
      */
     private void saveEmiInfo(Payment payment) {
 
-        EmiEntity emiEntity = lenderHelper.getEmiWithEmiNo(payment.getEmiNo());
-        emiEntity.setAmount(payment.getLumpSumAmount());
-        emiEntity.setStatus(SUCCESS);
+        EmiEntity emiEntity = lenderHelper.getEmiWithEmiNo(payment.getBorrowerName(), payment.getBankName(),
+                payment.getEmiNo()
+        );
+        emiEntity.setAmount(payment.getLumpSumAmount() + emiEntity.getAmount());
+        emiEntity.setEmiNo(payment.getEmiNo());
+        emiEntity.setStatus(COMPLETED);
     }
 }

@@ -58,7 +58,6 @@ public class LoanServiceImpl implements LoanService {
         loanEntity.setInterestRate(loan.getInterestRate());
         loanEntity.setPersonId(personEntity.getId());
         loanEntity.setTotalEmis(totalEmis);
-        loanEntity.setAmountPaidSoFar(0);
         loanEntity.setEmiAmount(emiAmount);
         loanEntity.setTotalAmountToPay(totalAmountToPay);
         return loanEntity;
@@ -77,6 +76,7 @@ public class LoanServiceImpl implements LoanService {
         personEntity.setId(String.valueOf(ThreadLocalRandom.current().nextInt(10000)));
         personEntity.setName(loan.getBorrowerName());
         personEntity.setBankId(bankEntity.getId());
+        lenderHelper.createPersonMap(loan.getBorrowerName(), loan.getBankName(), personEntity);
         return personEntity;
     }
 

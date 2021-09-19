@@ -6,6 +6,7 @@ import com.lender.ledger.LenderApplication.entity.PersonEntity;
 import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.lender.ledger.LenderApplication.enums.Status.PENDING;
 
@@ -13,7 +14,7 @@ import static com.lender.ledger.LenderApplication.enums.Status.PENDING;
 public class LenderHelper {
 
     private final Map<String, LoanEntity> loanEntityMap = new HashMap<>();
-    private final Map<Integer, EmiEntity> emisWithEmiNoMap = new HashMap<>();
+    private final Map<String, EmiEntity> emisWithEmiNoMap = new HashMap<>();
     private final Map<String, EmiEntity[]> emisWithPersonNameAndBankNameMap = new HashMap<>();
     private final Map<String, PersonEntity> personEntitiesMap = new HashMap<>();
 
@@ -50,14 +51,20 @@ public class LenderHelper {
      */
     public void createEmis(LoanEntity loanEntity, String personName, String bankName, int emiAmount, int totalEmis) {
 
-        EmiEntity[] emis = new EmiEntity[totalEmis];
-        for (int i = 0; i < totalEmis; i++) {
+        EmiEntity[] emis = new EmiEntity[totalEmis + 1];
+        for (int i = 0; i <= totalEmis; i++) {
             EmiEntity emiObj = new EmiEntity();
-            emiObj.setEmiNo(i + 1);
-            emiObj.setAmount(emiAmount);
+            emiObj.setId(String.valueOf(ThreadLocalRandom.current().nextInt(10000)));
             emiObj.setLoanId(loanEntity.getId());
             emiObj.setStatus(PENDING);
-            emisWithEmiNoMap.put(i + 1, emiObj);
+            emiObj.setEmiNo(i);
+            if (i > 0) {
+                emiObj.setAmount(emiAmount);
+            } else {
+                emiObj.setAmount(0);
+            }
+            emis[i] = emiObj;
+            emisWithEmiNoMap.put(personName + "_" + bankName + "_" + i, emiObj);
         }
         emisWithPersonNameAndBankNameMap.put(personName + "_" + bankName, emis);
     }
@@ -68,9 +75,9 @@ public class LenderHelper {
      * @param emiNo
      * @return EmiEntity
      */
-    public EmiEntity getEmiWithEmiNo(int emiNo) {
+    public EmiEntity getEmiWithEmiNo(String personName, String bankName, int emiNo) {
 
-        return emisWithEmiNoMap.get(emiNo);
+        return emisWithEmiNoMap.get(personName + "_" + bankName + "_" + emiNo);
     }
 
     /**

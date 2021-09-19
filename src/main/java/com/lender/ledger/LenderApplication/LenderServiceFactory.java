@@ -9,14 +9,21 @@ import com.lender.ledger.LenderApplication.service.balance.BalanceService;
 import com.lender.ledger.LenderApplication.service.loan.LoanService;
 import com.lender.ledger.LenderApplication.service.payment.PaymentService;
 import com.lender.ledger.LenderApplication.validation.RequestValidator;
+import com.lender.ledger.LenderApplication.validation.ValidationSchemaStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Factory {
+@Component
+public class LenderServiceFactory {
+
+    @Autowired
+    private ValidationSchemaStore validationSchemaStore;
 
     @Autowired
     private RequestValidator requestValidator;
@@ -30,6 +37,9 @@ public class Factory {
     @Autowired
     private LoanService loanService;
 
+    @Autowired
+    private ApplicationContext appContext;
+
     private final Map<String, List<Balance> > balanceMap = new HashMap<>();
 
     /**
@@ -41,33 +51,35 @@ public class Factory {
 
         try {
             for (String input : inputs) {
-                String[] req = input.split(" ");
-                switch (Operation.valueOf(req[0].toUpperCase())) {
-                    case LOAN:
-                        Loan loanInput = createLoanInput(req);
-                        requestValidator.validate(loanInput, Operation.LOAN);
-                        loanService.createLoan(loanInput);
-                        break;
-                    case PAYMENT:
-                        Payment paymentInput = createPaymentInput(req);
-                        requestValidator.validate(paymentInput, Operation.PAYMENT);
-                        paymentService.makePayment(paymentInput);
-                        break;
-                    case BALANCE:
-                        Balance balanceInput = createBalanceInput(req);
-                        requestValidator.validate(balanceInput, Operation.BALANCE);
-                        createBalanceMap(balanceInput);
-                        break;
-                    default:
-                        System.out.println("Invalid operation");
-                        break;
+                try {
+                    String[] req = input.split(" ");
+                    switch (Operation.valueOf(req[0].toUpperCase())) {
+                        case LOAN:
+                            Loan loanInput = createLoanInput(req);
+                            requestValidator.validate(loanInput, Operation.LOAN);
+                            loanService.createLoan(loanInput);
+                            break;
+                        case PAYMENT:
+                            Payment paymentInput = createPaymentInput(req);
+                            requestValidator.validate(paymentInput, Operation.PAYMENT);
+                            paymentService.makePayment(paymentInput);
+                            break;
+                        case BALANCE:
+                            Balance balanceInput = createBalanceInput(req);
+                            requestValidator.validate(balanceInput, Operation.BALANCE);
+                            createBalanceMap(balanceInput);
+                            break;
+                        default:
+                            System.out.println("Invalid operation");
+                            break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             printAmountPaidAndRemainingEmis();
-        } catch (LenderServiceException lex) {
-            throw lex;
         } catch (Exception ex) {
-            throw new LenderServiceException(ex);
+            ex.printStackTrace();
         }
     }
 
@@ -95,8 +107,10 @@ public class Factory {
      */
     public void printAmountPaidAndRemainingEmis() {
 
-        for (Map.Entry<String, List<Balance> > entry : balanceMap.entrySet()) {
-            balanceService.printAmountPaidAndRemainingEmis(entry.getValue());
+        if (!balanceMap.isEmpty()) {
+            for (Map.Entry<String, List<Balance> > entry : balanceMap.entrySet()) {
+                balanceService.printAmountPaidAndRemainingEmis(entry.getValue());
+            }
         }
     }
 

@@ -58,7 +58,7 @@
 						<descriptor>src/main/resources/assembly/distribution.xml</descriptor>
 					</descriptors>
 					<tarLongFileMode>posix</tarLongFileMode>
-					<finalName>${project.artifactId}-${project.version}</finalName>
+					<finalName>geektrust</finalName>
 				</configuration>
 				<executions>
 					<execution>

@@ -25,9 +25,6 @@ public class LoanEntity extends BaseEntity {
     @JsonProperty("year")
     private Integer year;
 
-    @JsonProperty("amountPaidSoFar")
-    private Integer amountPaidSoFar;
-
     @JsonProperty("totalEmis")
     private Integer totalEmis;
 
@@ -35,7 +32,7 @@ public class LoanEntity extends BaseEntity {
     private Integer emiAmount;
 
     @JsonProperty("totalAmountToPay")
-    private Integer totalAmountToPay;
+    private Integer totalAmountToPay = 0;
 
     public String getName() {
         return name;
@@ -75,14 +72,6 @@ public class LoanEntity extends BaseEntity {
 
     public void setYear(Integer year) {
         this.year = year;
-    }
-
-    public Integer getAmountPaidSoFar() {
-        return amountPaidSoFar;
-    }
-
-    public void setAmountPaidSoFar(Integer amountPaidSoFar) {
-        this.amountPaidSoFar = amountPaidSoFar;
     }
 
     public Integer getTotalEmis() {

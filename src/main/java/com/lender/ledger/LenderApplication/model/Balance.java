@@ -42,4 +42,14 @@ public class Balance extends BaseModel {
     public void setEmiNo(Integer emiNo) {
         this.emiNo = emiNo;
     }
+
+    @Override
+    public String toString() {
+
+        return "Balance{" +
+                "bankName='" + bankName + '\'' +
+                ", borrowerName='" + borrowerName + '\'' +
+                ", emiNo=" + emiNo +
+                '}';
+    }
 }
