@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "bankName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "borrowerName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "emiNo": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": [
+    "bankName",
+    "borrowerName",
+    "emiNo"
+  ],
+  "type": "object"
+}
